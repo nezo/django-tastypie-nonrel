@@ -15,8 +15,8 @@ class ListField(ApiField):
     """
     dehydrated_type     =   'list'
 
-    def dehydrate(self, obj):
-        return self.convert(super(ListField, self).dehydrate(obj))
+    def dehydrate(self, obj, **kwargs):
+        return self.convert(super(ListField, self).dehydrate(obj, **kwargs))
 
     def convert(self, value):
         if value is None:
@@ -44,7 +44,7 @@ class EmbeddedListField(ToManyField):
                                                  full=full, 
                                                  unique=unique, 
                                                  help_text=help_text)
-    def dehydrate(self, bundle):
+    def dehydrate(self, bundle, **kwargs):
         if not bundle.obj or not bundle.obj.pk:
             if not self.null:
                 raise ApiFieldError("The model '%r' does not have a primary key and can not be d in a ToMany context." % bundle.obj)
@@ -62,7 +62,7 @@ class EmbeddedListField(ToManyField):
             m2m_resource = self.get_related_resource(m2m)
             m2m_bundle = Bundle(obj=m2m)
             self.m2m_resources.append(m2m_resource)
-            m2m_dehydrated.append(self.dehydrate_related(m2m_bundle, m2m_resource))
+            m2m_dehydrated.append(self.dehydrate_related(m2m_bundle, m2m_resource, **kwargs))
         return m2m_dehydrated
 
     def hydrate(self, bundle):
@@ -71,8 +71,8 @@ class EmbeddedListField(ToManyField):
 class DictField(ApiField):
     dehydrated_type     =   'dict'
     
-    def dehydrate(self, obj):
-        return self.convert(super(DictField, self).dehydrate(obj))
+    def dehydrate(self, obj, **kwargs):
+        return self.convert(super(DictField, self).dehydrate(obj, **kwargs))
 
     def convert(self, value):
         if value is None:
@@ -99,8 +99,8 @@ class EmbeddedModelField(ToOneField):
                                                  full=True,
                                                  help_text=help_text,
                                                 )
-    def dehydrate(self, obj):
-        return super(EmbeddedModelField, self).dehydrate(obj).data
+    def dehydrate(self, obj, **kwargs):
+        return super(EmbeddedModelField, self).dehydrate(obj, **kwargs).data
 
     def hydrate(self, bundle):
         return super(EmbeddedModelField, self).hydrate(bundle).obj
@@ -140,7 +140,7 @@ class EmbeddedCollection(ToManyField):
                                                  unique=unique, 
                                                  help_text=help_text)
 
-    def dehydrate(self, bundle):
+    def dehydrate(self, bundle, **kwargs):
         if not bundle.obj or not bundle.obj.pk:
             if not self.null:
                 raise ApiFieldError("The model '%r' does not have a primary key and can not be d in a ToMany context." % bundle.obj)
